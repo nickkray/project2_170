@@ -33,6 +33,8 @@
 #include "addrspace.h"
 #include "../filesys/openfile.h"
 
+#include <iostream>
+
 #define MAX_FILENAME 256
 
 void doExit();
@@ -62,6 +64,10 @@ void doWrite();
 //  are in machine.h.
 //----------------------------------------------------------------------
 
+void Halt(){
+	std::cerr << "nigga im halt()in "<<std::endl;
+}
+
 void
 ExceptionHandler(ExceptionType which)
 {
@@ -70,6 +76,8 @@ ExceptionHandler(ExceptionType which)
     if (which == SyscallException) {
         switch (type) {
             case SC_Halt:
+		std::cerr << "nigga im haltin" << std::endl;
+		Halt();
                 DEBUG('a', "Shutdown, initiated by user program.\n");
                 interrupt->Halt();
                 break;
@@ -236,4 +244,3 @@ void doWrite()
 
     delete[] kernelBuf;
 }
-
