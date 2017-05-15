@@ -487,7 +487,7 @@ int userReadWrite(int virtAddr, char* buffer, int size, int type) {
 // Write file system call implementation
 //----------------------------------------------------------------------
 void writeImpl() {
-    
+   return; 
     int writeAddr = machine->ReadRegister(4);
     int size = machine->ReadRegister(5);
     int fileID = machine->ReadRegister(6);
