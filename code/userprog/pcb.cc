@@ -22,6 +22,15 @@ PCB::PCB(int pid, int parentPID) : openFilesBitMap(MAX_NUM_FILES_OPEN) {
     // Account for files that are already opened, including descriptor  0 and 1
     // Child process should inherit the file descriptors openned in the parent process
     // Implement me
+
+/*
+
+BitMap openFilesBitMap;
+        int pid;
+        int parentPID;
+        UserOpenFile userOpenFileList[MAX_NUM_FILES_OPEN];
+*/
+
     
    
 }

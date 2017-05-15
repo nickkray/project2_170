@@ -145,7 +145,7 @@ AddrSpace::AddrSpace(OpenFile *executable, PCB* pcb)
 //----------------------------------------------------------------------
 
 AddrSpace::AddrSpace(const AddrSpace* other, PCB* pcb) {
-    
+
     ASSERT(other->numPages <= NumPhysPages);
 
     // Copy all page table entries over, create associated PCB
@@ -155,28 +155,44 @@ AddrSpace::AddrSpace(const AddrSpace* other, PCB* pcb) {
 
     if (numPages <= memoryManager->getNumFreePages()) {
 
-        //this->pcb = pcb;
+        this->pcb = pcb;
         pageTable = new TranslationEntry[numPages];
 	//Allocate physical pages for each page in the new process under pcb
-	//Implement me
-	this->pcb = new PCB(0, pcb->getPID());	//0 because child and parentid is old one
 	
+	for (int i = 0; i < numPages; i++) {
+            pageTable[i].physicalPage = memoryManager->getPage();
+	    
+        }
+
+	//Implement me
         memoryManager->lock->Release();
 
         machineLock->Acquire();
+
 	//Copy page content of the other process to the new address space page by page
         //Implement me
+
+	unsigned int src, dest;
+
 	for (int i = 0; i < numPages; i++) {
-            pageTable[i].virtualPage = other->pageTable[i].virtualPage;
-            pageTable[i].physicalPage = memoryManager->getPage();
+
+pageTable[i].virtualPage = i;
             pageTable[i].valid = other->pageTable[i].valid;
             pageTable[i].use = other->pageTable[i].use;
             pageTable[i].dirty = other->pageTable[i].dirty;
             pageTable[i].readOnly = other->pageTable[i].readOnly;
-        }
 
-        
+
+		src = other->pageTable[i].physicalPage * PageSize;
+		dest = pageTable[i].physicalPage * PageSize;
+
+		bcopy(machine->mainMemory + src,machine->mainMemory + dest, PageSize);
+	}       
+
+
+
         machineLock->Release();
+
     }
     else {// Cannot fit into the current available memory
         memoryManager->lock->Release();

@@ -104,9 +104,11 @@ void ExceptionHandler(ExceptionType which)
                 fprintf(stderr, "System Call: %d invoked Exec\n", pcb->getPID());
                 readFilenameFromUsertoKernel(filename);
                 newProcessPID = execImpl(filename);
+		fprintf(stderr, "execimpl ran okay\n");
                 machineLock->Acquire();
                 machine->WriteRegister(2, newProcessPID);
                 machineLock->Release();
+		fprintf(stderr, "ma nigga sc_exec finished okay\n");
                 break;
             case SC_Join:
                 fprintf(stderr, "System Call: %d invoked Join\n", pcb->getPID());
@@ -163,33 +165,71 @@ void ExceptionHandler(ExceptionType which)
 //----------------------------------------------------------------------
 
 int forkImpl() {
- return -1;
-}
-/*
+
     // Create a new Nacho kernel thread that will execute the new user-level child process
     Thread* childThread = new Thread("user-level child process");
 
-    int newProcessPC = machine->ReadRegister(4);
+
 
     // Find a new PID, and then construct new PCB. 
+	int currPID = currentThread->space->getPCB()->getPID();
    // Implement me
+
+    int newPID = processManager->getPID();
+
+    PCB* pcb = new PCB(newPID, currPID);
+    pcb->status = P_RUNNING;
+    pcb->process = childThread;
+
 
     // Make a copy of the address space as the child space, save its registers
    // Implement me
 
+    int newProcessPC = machine->ReadRegister(PCReg);
+
+
+	AddrSpace* currAddrSpace = currentThread->space;
+	AddrSpace* newSpace = new AddrSpace(currAddrSpace, pcb);
+	int childNumPages = newSpace->getNumPages();	
+
+	childThread->space = newSpace;
+
+	childThread->SaveUserState();
+
+	//newSpace->InitRegisters();
+
+
+	//currentThread->SaveUserState();
+//	machine->WriteRegister(PCReg, newProcessPC);
+//	machine->WriteRegister(NextPCReg, newProcessPC + 4);
+	//machine->WriteRegister(StackReg, currentThread->space->getThreadStackTop(currPID));
+
+machine->WriteRegister(PrevPCReg, newProcessPC);
+machine->WriteRegister(PCReg, newProcessPC+4);
+machine->WriteRegister(NextPCReg, newProcessPC+4);
+
+	//childThread->SaveUserState();
+
+	//currentThread->RestoreUserState();
+
     // Mandatory printout of the forked process
     PCB* parentPCB = currentThread->space->getPCB();
+
+
+
     PCB* childPCB = childThread->space->getPCB();
+
     fprintf(stderr, "Process %d Fork: start at address 0x%x with %d pages memory\n",
      	 currPID, newProcessPC, childNumPages);
       
     // Set up the function for the that new process will run and yield
     childThread->Fork(copyStateBack, newProcessPC);
+
     currentThread->Yield(); 
     return newPID;
 }
 
-*/
+
 
 
 //----------------------------------------------------------------------
@@ -221,7 +261,7 @@ void copyStateBack(int forkPC) {
 // Yield system call implementation.
 //----------------------------------------------------------------------
 
-void yieldImpl() {
+void yieldImpl() {		//DO AFTER FLORK
 
     
     //Save the corresponding user process's register states.
@@ -230,6 +270,8 @@ void yieldImpl() {
     //Restore the corresponding user process's states (both registers and page table)
     
    // Implement me
+	currentThread->SaveUserState();
+	
    
 }
 
@@ -273,11 +315,12 @@ int joinImpl() {
         
    // Use proessManager to join otherPID 
    	// Implement me
-
+	
 
 
    //Change the process state in its PCB as P_RUNNING
    	// Implement me
+	
     
     return processManager->getStatus(otherPID);
 }
@@ -487,33 +530,74 @@ int userReadWrite(int virtAddr, char* buffer, int size, int type) {
 // Write file system call implementation
 //----------------------------------------------------------------------
 void writeImpl() {
-   return; 
+
+/*
     int writeAddr = machine->ReadRegister(4);
     int size = machine->ReadRegister(5);
     int fileID = machine->ReadRegister(6);
 
     char* buffer = new char[size + 1];
-    if (fileID == ConsoleOutput) {
+*/
+
+ int userBufVirtAddr = machine->ReadRegister(4);
+    int userBufSize = machine->ReadRegister(5);
+    int dstFile = machine->ReadRegister(6);
+
+    int i, userBufPhysAddr, bytesToEndOfPage, bytesToCopy, bytesCopied = 0;
+    char *kernelBuf = new char[userBufSize + 1];
+
+    if (dstFile == ConsoleOutput) {
+/*
+	printf ("nigga 1.\n");
         userReadWrite(writeAddr, buffer, size, USER_WRITE);
         buffer[size] = 0; // always terminate
-        //printf("%s", buffer);
+        printf("%s", buffer);
         openFileManager->consoleWriteLock->Acquire();
         for (int i = 0; i < size; ++i)
             UserConsolePutChar(buffer[i]);
         openFileManager->consoleWriteLock->Release();
+
+*/
+
+	while (bytesCopied < userBufSize) {
+
+            // Perform virtual to physical address translation
+            userBufPhysAddr = currentThread->space->Translate(userBufVirtAddr + bytesCopied);
+
+            // Determine how many bytes we can read from this page
+            bytesToEndOfPage = PageSize - userBufPhysAddr % PageSize;
+            if (userBufSize < bytesToEndOfPage)
+                bytesToCopy = userBufSize;
+            else
+                bytesToCopy = bytesToEndOfPage;
+
+            // Copy bytes into kernel buffer
+            memcpy(&kernelBuf[bytesCopied], &machine->mainMemory[userBufPhysAddr], bytesToCopy);
+            bytesCopied += bytesToCopy;
+        }
+
+        // Write buffer to console (writes should be atomic)
+        openFileManager->consoleWriteLock->Acquire();
+        for (i = 0; i < userBufSize; ++i)
+            UserConsolePutChar(kernelBuf[i]);
+        openFileManager->consoleWriteLock->Release();
+
+
+
     }
     else {
+	printf ("nigga 2.\n");
         //Fetch data from the user space to this system buffer using  userReadWrite().
         //Implement me
-        UserOpenFile* userFile = currentThread->space->getPCB()->getFile(fileID);
+        UserOpenFile* userFile = currentThread->space->getPCB()->getFile(dstFile);
 	//Use openFileManager to find the openned file structure (SysOpenFile)
 	//Use writeAt() to write out the above buffer withe size listed..
 	//Increment the current offset  by the actual number of bytes written.
         //Implement me
-            
+        
         
     }
-    delete [] buffer;
+    delete [] kernelBuf;
 }
 
 //----------------------------------------------------------------------
