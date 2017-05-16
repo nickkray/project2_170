@@ -263,7 +263,9 @@ AddrSpace::InitRegisters()
 //----------------------------------------------------------------------
 
 void AddrSpace::SaveState() 
-{}
+{
+ DEBUG('a', "Remember space->SaveState does nothin...");
+}
 
 //----------------------------------------------------------------------
 // AddrSpace::RestoreState

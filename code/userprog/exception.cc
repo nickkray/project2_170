@@ -194,23 +194,14 @@ int forkImpl() {
 
 	childThread->space = newSpace;
 
-	childThread->SaveUserState();
+	childThread->SaveUserState();	//need thsi here
 
 	newSpace->InitRegisters();
-	childThread->space->SaveState();
-
-	//currentThread->SaveUserState();
-//	machine->WriteRegister(PCReg, newProcessPC);
-//	machine->WriteRegister(NextPCReg, newProcessPC + 4);
-	//machine->WriteRegister(StackReg, currentThread->space->getThreadStackTop(currPID));
 
 	machine->WriteRegister(PrevPCReg, newProcessPC);
 	machine->WriteRegister(PCReg, newProcessPC+4);
 	machine->WriteRegister(NextPCReg, newProcessPC+4);
 
-	//childThread->SaveUserState();
-
-	//currentThread->RestoreUserState();
 
     // Mandatory printout of the forked process
     PCB* parentPCB = currentThread->space->getPCB();
@@ -270,12 +261,10 @@ void yieldImpl() {		//DO AFTER FLORK
     //Restore the corresponding user process's states (both registers and page table)
     
    // Implement me
-	currentThread->SaveUserState();
-	currentThread->Yield();
+	currentThread->SaveUserState();	//saves register states
+	currentThread->Yield();	//yields
 	currentThread->RestoreUserState();
 	currentThread->space->RestoreState();
-	
- 
 }
 
 //----------------------------------------------------------------------
@@ -318,11 +307,12 @@ int joinImpl() {
         
    // Use proessManager to join otherPID 
    	// Implement me
-	
+	processManager->join(otherPID);
 
 
    //Change the process state in its PCB as P_RUNNING
    	// Implement me
+	currentThread->space->getPCB()->status = P_RUNNING;
 	
     
     return processManager->getStatus(otherPID);
