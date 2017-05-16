@@ -196,17 +196,17 @@ int forkImpl() {
 
 	childThread->SaveUserState();
 
-	//newSpace->InitRegisters();
-
+	newSpace->InitRegisters();
+	childThread->space->SaveState();
 
 	//currentThread->SaveUserState();
 //	machine->WriteRegister(PCReg, newProcessPC);
 //	machine->WriteRegister(NextPCReg, newProcessPC + 4);
 	//machine->WriteRegister(StackReg, currentThread->space->getThreadStackTop(currPID));
 
-machine->WriteRegister(PrevPCReg, newProcessPC);
-machine->WriteRegister(PCReg, newProcessPC+4);
-machine->WriteRegister(NextPCReg, newProcessPC+4);
+	machine->WriteRegister(PrevPCReg, newProcessPC);
+	machine->WriteRegister(PCReg, newProcessPC+4);
+	machine->WriteRegister(NextPCReg, newProcessPC+4);
 
 	//childThread->SaveUserState();
 
@@ -271,8 +271,11 @@ void yieldImpl() {		//DO AFTER FLORK
     
    // Implement me
 	currentThread->SaveUserState();
+	currentThread->Yield();
+	currentThread->RestoreUserState();
+	currentThread->space->RestoreState();
 	
-   
+ 
 }
 
 //----------------------------------------------------------------------

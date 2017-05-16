@@ -176,7 +176,7 @@ AddrSpace::AddrSpace(const AddrSpace* other, PCB* pcb) {
 
 	for (int i = 0; i < numPages; i++) {
 
-pageTable[i].virtualPage = i;
+	pageTable[i].virtualPage = i;
             pageTable[i].valid = other->pageTable[i].valid;
             pageTable[i].use = other->pageTable[i].use;
             pageTable[i].dirty = other->pageTable[i].dirty;
