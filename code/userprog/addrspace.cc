@@ -176,20 +176,17 @@ AddrSpace::AddrSpace(const AddrSpace* other, PCB* pcb) {
 
 	for (int i = 0; i < numPages; i++) {
 
-	pageTable[i].virtualPage = i;
-            pageTable[i].valid = other->pageTable[i].valid;
-            pageTable[i].use = other->pageTable[i].use;
-            pageTable[i].dirty = other->pageTable[i].dirty;
-            pageTable[i].readOnly = other->pageTable[i].readOnly;
-
+	    pageTable[i].virtualPage = i;
+        pageTable[i].valid = other->pageTable[i].valid;
+        pageTable[i].use = other->pageTable[i].use;
+        pageTable[i].dirty = other->pageTable[i].dirty;
+        pageTable[i].readOnly = other->pageTable[i].readOnly;
 
 		src = other->pageTable[i].physicalPage * PageSize;
 		dest = pageTable[i].physicalPage * PageSize;
 
 		bcopy(machine->mainMemory + src,machine->mainMemory + dest, PageSize);
 	}       
-
-
 
         machineLock->Release();
 

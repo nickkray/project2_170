@@ -29,9 +29,26 @@ BitMap openFilesBitMap;
         int pid;
         int parentPID;
         UserOpenFile userOpenFileList[MAX_NUM_FILES_OPEN];
-*/
 
-    
+
+        char* fileName;
+        int indexInSysOpenFileList;
+        int currOffsetInFile;
+*/
+openFilesBitMap.Mark(0);
+openFilesBitMap.Mark(1);
+
+UserOpenFile stdin = UserOpenFile();
+stdin.fileName = "stdin";
+stdin.currOffsetInFile = 0;
+stdin.indexInSysOpenFileList = 0;
+UserOpenFile stdout = UserOpenFile();
+stdout.fileName = "stdin";
+stdout.currOffsetInFile = 0;
+stdout.indexInSysOpenFileList = 1;
+
+    addFile(stdin);
+    addFile(stdout);
    
 }
 
