@@ -193,7 +193,7 @@ int forkImpl() {
 
     int newProcessPC = machine->ReadRegister(4);
 
-    printf("4 is %d and pcreg is %d\n", newProcessPC, machine->ReadRegister(PCReg));
+    //fprintf(stderr, "4 is %d and pcreg is %d\n", newProcessPC, machine->ReadRegister(PCReg));
 
 
 	AddrSpace* currAddrSpace = currentThread->space;
@@ -295,9 +295,10 @@ void exitImpl() {
    //Clean up the space of this process
 
                     //THIS SEG FAULTED HERE BEFORE SO WE'll LEAVE THIS OCMMENTED OUT
-    //delete currentThread->space;
-   // currentThread->space = NULL;
-   // processManager->clearPID(currPID);
+      currentThread->Finish();
+    delete currentThread->space;
+   currentThread->space = NULL;
+   processManager->clearPID(currPID);
     
 
     
@@ -431,6 +432,7 @@ void readFilenameFromUsertoKernel(char* filename) {
 void createImpl(char* filename) {
     //use fileSystem to create a file
    	// Implement me
+   fileSystem->Create(filename, 0);
 }
 
 //----------------------------------------------------------------------
@@ -470,6 +472,10 @@ int openImpl(char* filename) {
 
        // Setup this SysOpenFile data structure
    	// Implement me
+   	currSysFile.file = fileSystem->Open(filename);
+   	currSysFile.filename = filename;
+	currSysFile.numProcessesAccessing = 1;
+	//currSysFile.fileID = machine->ReadRegister(4);;
        
         index = openFileManager->addFile(currSysFile);
     }
@@ -479,6 +485,10 @@ int openImpl(char* filename) {
 
     // Either way, add it to the current PCB's open file list
     UserOpenFile currUserFile;
+    currUserFile.fileName = filename;
+    currUserFile.indexInSysOpenFileList = index;
+    currUserFile.currOffsetInFile = 0;
+    
     
    //Set up this UserOpenFile data structure
    // Implement me
@@ -502,7 +512,7 @@ int userReadWrite(int virtAddr, char* buffer, int size, int type) {
         while (size > 0) {
             //Translate the virtual address to phyiscal address physAddr 
             //Implement me
-            printf("======USER_READ BEING CALLED =====\n");
+            //fprintf(stderr, "======USER_READ BEING CALLED =====\n");
 
              // Perform virtual to physical address translation
             physAddr = currentThread->space->Translate(virtAddr);
@@ -516,7 +526,7 @@ int userReadWrite(int virtAddr, char* buffer, int size, int type) {
         }
     }
     else if (type == USER_WRITE) { // Copy data from the user's main memory to the system buffer
-        printf("======USER_WRITE BEING CALLED =====\n");
+        //firintf(stderr, "======USER_WRITE BEING CALLED =====\n");
         //moveBytesFromMemToKernel(virtAddr, 15, 15);
         while (size > 0) {
             //Translate the virtual address to phyiscal address physAddr 
@@ -550,7 +560,7 @@ void writeImpl() {
     int size = machine->ReadRegister(5);
     int fileID = machine->ReadRegister(6);
 
-printf("Contents of writeAddr(%d) size(%d) fileId(%d)\n", writeAddr, size, fileID);
+//fprintf(stderr, "Contents of writeAddr(%d) size(%d) fileId(%d)\n", writeAddr, size, fileID);
 
     char* buffer = new char[size + 1];
     if (fileID == ConsoleOutput) {
@@ -565,11 +575,22 @@ printf("Contents of writeAddr(%d) size(%d) fileId(%d)\n", writeAddr, size, fileI
     else {
         //Fetch data from the user space to this system buffer using  userReadWrite().
         //Implement me
+	userReadWrite(writeAddr, buffer, size, USER_WRITE);
+
         UserOpenFile* userFile = currentThread->space->getPCB()->getFile(fileID);
     //Use openFileManager to find the openned file structure (SysOpenFile)
+
+	SysOpenFile* currSysFile = openFileManager -> getFile(userFile->indexInSysOpenFileList);	    
+
     //Use writeAt() to write out the above buffer withe size listed..
+
+	currSysFile->file->WriteAt(buffer, size, userFile->currOffsetInFile);
+	
+
     //Increment the current offset  by the actual number of bytes written.
         //Implement me
+        
+	userFile->currOffsetInFile += size;
             
         
     }
@@ -581,7 +602,6 @@ printf("Contents of writeAddr(%d) size(%d) fileId(%d)\n", writeAddr, size, fileI
 //----------------------------------------------------------------------
 
 int readImpl() {
-
     int readAddr = machine->ReadRegister(4);
     int size = machine->ReadRegister(5);
     int fileID = machine->ReadRegister(6);
@@ -597,16 +617,29 @@ int readImpl() {
         }
     }
     else {//Read data from the file to the system buffer
-	
+//printf("here 1");	
 	UserOpenFile* userFile = currentThread->space->getPCB()->getFile(fileID);
+
+    	SysOpenFile* currSysFile = openFileManager->getFile(userFile->indexInSysOpenFileList);
+if(currSysFile == NULL){
+printf("tried to get filename(%s)\n", userFile->fileName);
+	printf("something went wrong here\n");
+return 0;
+}
 	//Now from openFileManger, find the SystemOpenFile data structure for this userFile.
+
 	//Use ReadAt() to read the file at selected offset to this system buffer buffer[]
+	//printf("reading file(%s) size(%d) at offset(%d)", userFile->fileName, size, userFile->currOffsetInFile);
+
+	currSysFile->file->ReadAt(buffer, size, userFile->currOffsetInFile);
 	// Adust the offset in userFile to reflect my current position.
+
+	userFile->currOffsetInFile += numActualBytesRead;
 	// Implement me
-        
     }
     //Now copy data from the system buffer to the targted main memory space using userReadWrite()
     //Implement me
+    userReadWrite(readAddr, buffer, size, USER_READ);
 
     delete [] buffer;
     return numActualBytesRead;
