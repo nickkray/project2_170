@@ -262,7 +262,7 @@ void copyStateBack(int forkPC) {
 
 void yieldImpl() {		//DO AFTER FLORK
 
-    
+   printf("yielding.."); 
     //Save the corresponding user process's register states.
     //This kernel thread yields
     //Now this process is resumed for exectuion after yielding.
@@ -281,7 +281,7 @@ void yieldImpl() {		//DO AFTER FLORK
 
 void exitImpl() {
 
-
+//printf("exit was called here doe\n");
     //
     int status = machine->ReadRegister(4);
     int currPID = currentThread->space->getPCB()->getPID();
@@ -295,6 +295,7 @@ void exitImpl() {
    //Clean up the space of this process
 
                     //THIS SEG FAULTED HERE BEFORE SO WE'll LEAVE THIS OCMMENTED OUT
+      processManager->broadcast(currPID);
       currentThread->Finish();
     delete currentThread->space;
    currentThread->space = NULL;

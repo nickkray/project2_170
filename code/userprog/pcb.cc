@@ -38,17 +38,17 @@ BitMap openFilesBitMap;
 openFilesBitMap.Mark(0);
 openFilesBitMap.Mark(1);
 
-UserOpenFile stdin = UserOpenFile();
-stdin.fileName = "stdin";
-stdin.currOffsetInFile = 0;
-stdin.indexInSysOpenFileList = 0;
-UserOpenFile stdout = UserOpenFile();
-stdout.fileName = "stdin";
-stdout.currOffsetInFile = 0;
-stdout.indexInSysOpenFileList = 1;
+//UserOpenFile stdin = UserOpenFile();
+//stdin.fileName = "stdin";
+//stdin.currOffsetInFile = 0;
+//stdin.indexInSysOpenFileList = 0;
+//UserOpenFile stdout = UserOpenFile();
+//stdout.fileName = "stdin";
+//stdout.currOffsetInFile = 0;
+//stdout.indexInSysOpenFileList = 1;
 
-    addFile(stdin);
-    addFile(stdout);
+//    addFile(stdin);
+//    addFile(stdout);
    
 }
 

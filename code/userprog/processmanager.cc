@@ -98,7 +98,11 @@ void ProcessManager::join(int pid) {
         conditionList[pid] = conditionForOtherProcess;
     }
    // Increment  processesWaitingOnPID[pid].
+   processesWaitingOnPID[pid]++;
    // Conditional waiting on when it becomes 0. When it bcomes 0, recycle pid.
+	if(processesWaitingOnPID[pid] == 0)
+		processesBitMap.Clear(pid);
+
    // Implement me. 
 
 }
