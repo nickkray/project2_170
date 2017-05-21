@@ -1,0 +1,40 @@
+rm -f *~ */{core,nachos,DISK,*.o,swtch.s,*~} test/{*.coff} bin/{coff2flat,coff2noff,disassemble,out}
+cd test && make clean
+make[1]: Entering directory '/cs/student/nray/project2_170/code/test'
+rm -rf _
+make[1]: Leaving directory '/cs/student/nray/project2_170/code/test'
+../threads/main.cc
+../threads/list.cc
+../threads/scheduler.cc
+../threads/synch.cc
+../threads/synchlist.cc
+../threads/system.cc
+../threads/thread.cc
+../threads/utility.cc
+../threads/threadtest.cc
+../machine/interrupt.cc
+../machine/stats.cc
+../machine/sysdep.cc
+../machine/timer.cc
+../userprog/addrspace.cc
+../userprog/bitmap.cc
+../userprog/exception.cc
+../userprog/progtest.cc
+../machine/console.cc
+../machine/machine.cc
+../userprog/memorymanager.cc
+../machine/mipssim.cc
+../userprog/openfilemanager.cc
+../userprog/pcb.cc
+../userprog/processmanager.cc
+../userprog/sysopenfile.cc
+../machine/translate.cc
+../userprog/useropenfile.cc
+../threads/switch.s
+nachos
+123 there is a change main forking proc1...
+pContents of writeAddr(688) size(44) fileId(1)
+======USER_WRITE BEING CALLED =====
+4 is 468 and pcreg is 164
+Contents of writeAddr(664) size(23) fileId(1)
+======USER_WRITE BEING CALLED =====

@@ -262,7 +262,7 @@ void copyStateBack(int forkPC) {
 
 void yieldImpl() {		//DO AFTER FLORK
 
-   printf("yielding.."); 
+   //printf("yielding.."); 
     //Save the corresponding user process's register states.
     //This kernel thread yields
     //Now this process is resumed for exectuion after yielding.
@@ -295,7 +295,7 @@ void exitImpl() {
    //Clean up the space of this process
 
                     //THIS SEG FAULTED HERE BEFORE SO WE'll LEAVE THIS OCMMENTED OUT
-      processManager->broadcast(currPID);
+     processManager->broadcast(currPID);
 //      currentThread->Finish();
     delete currentThread->space;
    currentThread->space = NULL;
@@ -303,6 +303,7 @@ void exitImpl() {
     
 
   currentThread->Finish();  
+//	processManager->broadcast(currPID);
     //Terminate the current Nacho thread
 }
 

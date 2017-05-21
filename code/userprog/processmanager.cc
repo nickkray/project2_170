@@ -101,7 +101,7 @@ void ProcessManager::join(int pid) {
     // First, acquire the lock
     lockForOtherProcess->Acquire();
 
-    printf("Acquired lock\n");
+   // printf("Acquired lock\n");
     //then check to see if the thread has already finished (status == -1)
     if(getStatus(pid) != -1){
      
@@ -111,7 +111,7 @@ void ProcessManager::join(int pid) {
       // Conditional waiting on when it becomes 0. When it bcomes 0, recycle pid.
       while(getStatus(pid) != -1 && processesWaitingOnPID[pid] > 0){
 
-	printf("Processes waiting on %d: %d\n", pid, processesWaitingOnPID[pid]);
+	//printf("Processes waiting on %d: %d\n", pid, processesWaitingOnPID[pid]);
 	conditionForOtherProcess->Wait(lockForOtherProcess);
       }
       
@@ -125,7 +125,7 @@ void ProcessManager::join(int pid) {
     
     
     lockForOtherProcess->Release();
-    printf("released lock\n");
+    //printf("released lock\n");
 }
 
 //-----------------------------------------------------------------------------
