@@ -296,13 +296,13 @@ void exitImpl() {
 
                     //THIS SEG FAULTED HERE BEFORE SO WE'll LEAVE THIS OCMMENTED OUT
       processManager->broadcast(currPID);
-      currentThread->Finish();
+//      currentThread->Finish();
     delete currentThread->space;
    currentThread->space = NULL;
    processManager->clearPID(currPID);
     
 
-    
+  currentThread->Finish();  
     //Terminate the current Nacho thread
 }
 

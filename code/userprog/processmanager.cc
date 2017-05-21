@@ -118,10 +118,10 @@ void ProcessManager::join(int pid) {
       if(processesWaitingOnPID[pid] == 0){
 	processesBitMap.Clear(pid);
 	clearPID(pid);
-	printf("my nigga3\n");
+	//printf("my nigga3\n");
       }
     }
-    printf("my nigga4\n");
+    //printf("my nigga4\n");
     
     
     lockForOtherProcess->Release();
