@@ -314,18 +314,19 @@ int joinImpl() {
 
     int otherPID = machine->ReadRegister(4);
 
-   //Change the process state in its PCB as P_BLOCKED
+    //Change the process state in its PCB as P_BLOCKED, then broadcast it 
     currentThread->space->getPCB()->status = P_BLOCKED;
-        
-   // Use proessManager to join otherPID 
-   	// Implement me
-	processManager->join(otherPID);
-
-
-   //Change the process state in its PCB as P_RUNNING
-   	// Implement me
-	currentThread->space->getPCB()->status = P_RUNNING;
-	
+    processManager->broadcast(currentThread->space->getPCB()->getPID());
+    
+    // Use proessManager to join otherPID 
+    // Implement me
+    processManager->join(otherPID);
+    
+    
+    //Change the process state in its PCB as P_RUNNING, then broadcast it
+    // Implement me
+    currentThread->space->getPCB()->status = P_RUNNING;
+    processManager->broadcast(currentThread->space->getPCB()->getPID());
     
     return processManager->getStatus(otherPID);
 }

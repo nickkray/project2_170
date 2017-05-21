@@ -51,7 +51,7 @@ int ProcessManager::getPID() {
 
     int newPID = processesBitMap.Find();
     processesWaitingOnPID[newPID] = 0;
-    processesWaitingOnPID[newPID]++;
+    //processesWaitingOnPID[newPID]++;
     return newPID;
 }
 
@@ -97,14 +97,35 @@ void ProcessManager::join(int pid) {
         conditionForOtherProcess = new Condition("");
         conditionList[pid] = conditionForOtherProcess;
     }
-   // Increment  processesWaitingOnPID[pid].
-   processesWaitingOnPID[pid]++;
-   // Conditional waiting on when it becomes 0. When it bcomes 0, recycle pid.
-	if(processesWaitingOnPID[pid] == 0)
-		processesBitMap.Clear(pid);
 
-   // Implement me. 
+    // First, acquire the lock
+    lockForOtherProcess->Acquire();
 
+    printf("Acquired lock\n");
+    //then check to see if the thread has already finished (status == -1)
+    if(getStatus(pid) != -1){
+     
+      // Increment  processesWaitingOnPID[pid].
+      processesWaitingOnPID[pid]++;
+
+      // Conditional waiting on when it becomes 0. When it bcomes 0, recycle pid.
+      while(getStatus(pid) != -1 && processesWaitingOnPID[pid] > 0){
+
+	printf("Processes waiting on %d: %d\n", pid, processesWaitingOnPID[pid]);
+	conditionForOtherProcess->Wait(lockForOtherProcess);
+      }
+      
+      if(processesWaitingOnPID[pid] == 0){
+	processesBitMap.Clear(pid);
+	clearPID(pid);
+	printf("my nigga3\n");
+      }
+    }
+    printf("my nigga4\n");
+    
+    
+    lockForOtherProcess->Release();
+    printf("released lock\n");
 }
 
 //-----------------------------------------------------------------------------
@@ -120,8 +141,11 @@ void ProcessManager::broadcast(int pid) {
     pcbStatuses[pid] = pcbList[pid]->status;
 
     if (condition != NULL) { // something is waiting on this process
-	// Wake up others 
-	// Implement me
+      // Wake up others
+      // Implement me
+      lock->Acquire();
+      condition->Broadcast(lock);
+      lock->Release();
     }
 }
 
