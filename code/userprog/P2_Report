@@ -1,1 +1,8 @@
+Nick Ray
+Domenic DiPeppe
 
+The assignment is complete to all specifications.
+
+We implemented all segments of exception for the individual methods (fork, join, yield, etc.) and the auxillary files such as process manager, address space manager, and others.
+
+All of our tests pass as well as those on CS submit.
